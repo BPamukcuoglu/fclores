@@ -1,24 +1,16 @@
 import type { FC } from 'react';
-import { useEffect } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Box, Button, Container, Typography } from '@material-ui/core';
-import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { useTheme } from '@material-ui/core/styles';
-import gtm from '../lib/gtm';
 
 const ServerError: FC = () => {
   const theme = useTheme();
-  const mobileDevice = useMediaQuery(theme.breakpoints.down('sm'));
-
-  useEffect(() => {
-    gtm.push({ event: 'page_view' });
-  }, []);
 
   return (
     <>
       <Helmet>
-        <title>Error: Server Error | Material Kit Pro</title>
+        <title>Error: Server Error</title>
       </Helmet>
       <Box
         sx={{
@@ -34,7 +26,6 @@ const ServerError: FC = () => {
           <Typography
             align="center"
             color="textPrimary"
-            variant={mobileDevice ? 'h4' : 'h1'}
           >
             500: Internal Server Error
           </Typography>

@@ -11,35 +11,16 @@ import {
   Link,
   Typography
 } from '@material-ui/core';
-import AuthBanner from '../../components/authentication/AuthBanner';
 import {
-  LoginAmplify,
-  LoginAuth0,
-  LoginFirebase,
-  LoginJWT
+  Login as LoginComponent
 } from '../../components/authentication/login';
 import Logo from '../../components/Logo';
 import useAuth from '../../hooks/useAuth';
-import gtm from '../../lib/gtm';
 
-const platformIcons = {
-  Amplify: '/static/icons/amplify.svg',
-  Auth0: '/static/icons/auth0.svg',
-  Firebase: '/static/icons/firebase.svg',
-  JWT: '/static/icons/jwt.svg'
-};
-
-const Login: FC = () => {
-  const { platform } = useAuth() as any;
-
-  useEffect(() => {
-    gtm.push({ event: 'page_view' });
-  }, []);
-
-  return (
+const Login: FC = () => (
     <>
       <Helmet>
-        <title>Login | Material Kit Pro</title>
+        <title>BOUN Blockchain Based ABET Assestment Service</title>
       </Helmet>
       <Box
         sx={{
@@ -49,7 +30,6 @@ const Login: FC = () => {
           minHeight: '100vh'
         }}
       >
-        <AuthBanner />
         <Container
           maxWidth="sm"
           sx={{ py: '80px' }}
@@ -64,8 +44,8 @@ const Login: FC = () => {
             <RouterLink to="/">
               <Logo
                 sx={{
-                  height: 40,
-                  width: 40
+                  height: 100,
+                  width: 100
                 }}
               />
             </RouterLink>
@@ -98,23 +78,9 @@ const Login: FC = () => {
                     color="textSecondary"
                     variant="body2"
                   >
-                    Log in on the internal platform
+                    Log in on the BOUN Blockchain Based ABET Assestment Service
                   </Typography>
                 </div>
-                <Box
-                  sx={{
-                    height: 32,
-                    '& > img': {
-                      maxHeight: '100%',
-                      width: 'auto'
-                    }
-                  }}
-                >
-                  <img
-                    alt="Auth platform"
-                    src={platformIcons[platform]}
-                  />
-                </Box>
               </Box>
               <Box
                 sx={{
@@ -122,37 +88,21 @@ const Login: FC = () => {
                   mt: 3
                 }}
               >
-                {platform === 'Amplify' && <LoginAmplify />}
-                {platform === 'Auth0' && <LoginAuth0 />}
-                {platform === 'Firebase' && <LoginFirebase />}
-                {platform === 'JWT' && <LoginJWT />}
+                <LoginComponent />
               </Box>
               <Divider sx={{ my: 3 }} />
               <Link
                 color="textSecondary"
-                component={RouterLink}
-                to="/authentication/register"
+                href="mailto:ozturaca@boun.edu.tr"
                 variant="body2"
               >
                 Create new account
               </Link>
-              {platform === 'Amplify' && (
-                <Link
-                  color="textSecondary"
-                  component={RouterLink}
-                  sx={{ mt: 1 }}
-                  to="/authentication/password-recovery"
-                  variant="body2"
-                >
-                  Forgot password
-                </Link>
-              )}
             </CardContent>
           </Card>
         </Container>
       </Box>
     </>
   );
-};
 
 export default Login;

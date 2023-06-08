@@ -1,10 +1,8 @@
 import type { FC } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
 import {
-  Autocomplete,
   Avatar,
   Box,
   Button,
@@ -15,14 +13,11 @@ import {
   Divider,
   FormHelperText,
   Grid,
-  Link,
-  Switch,
   TextField,
   Typography
 } from '@material-ui/core';
 import useAuth from '../../../hooks/useAuth';
 import wait from '../../../utils/wait';
-import countries from './countries';
 
 const AccountGeneralSettings: FC = (props) => {
   const { user } = useAuth();
@@ -72,20 +67,6 @@ const AccountGeneralSettings: FC = (props) => {
               >
                 {user.name}
               </Typography>
-              <Typography
-                color="textSecondary"
-                variant="body2"
-              >
-                Your plan:
-                {' '}
-                <Link
-                  color="primary"
-                  component={RouterLink}
-                  to="/dashboard/account"
-                >
-                  {user.plan}
-                </Link>
-              </Typography>
             </Box>
           </CardContent>
           <CardActions>
@@ -109,35 +90,23 @@ const AccountGeneralSettings: FC = (props) => {
         <Formik
           enableReinitialize
           initialValues={{
-            canHire: user.canHire || false,
-            city: user.city || '',
-            country: user.country || '',
             email: user.email || '',
-            isPublic: user.isPublic || false,
             name: user.name || '',
-            phone: user.phone || '',
-            state: user.state || '',
             submit: null
           }}
           validationSchema={
             Yup
               .object()
               .shape({
-                canHire: Yup.bool(),
-                city: Yup.string().max(255),
-                country: Yup.string().max(255),
                 email: Yup
                   .string()
                   .email('Must be a valid email')
                   .max(255)
                   .required('Email is required'),
-                isPublic: Yup.bool(),
                 name: Yup
                   .string()
                   .max(255)
                   .required('Name is required'),
-                phone: Yup.string(),
-                state: Yup.string()
               })
           }
           onSubmit={async (values, {
@@ -218,132 +187,6 @@ const AccountGeneralSettings: FC = (props) => {
                         type="email"
                         value={values.email}
                         variant="outlined"
-                      />
-                    </Grid>
-                    <Grid
-                      item
-                      md={6}
-                      xs={12}
-                    >
-                      <TextField
-                        error={Boolean(touched.phone && errors.phone)}
-                        fullWidth
-                        helperText={touched.phone && errors.phone}
-                        label="Phone Number"
-                        name="phone"
-                        onBlur={handleBlur}
-                        onChange={handleChange}
-                        value={values.phone}
-                        variant="outlined"
-                      />
-                    </Grid>
-                    <Grid
-                      item
-                      md={6}
-                      xs={12}
-                    >
-                      <Autocomplete
-                        getOptionLabel={(option): string => option.text}
-                        options={countries}
-                        renderInput={(params): JSX.Element => (
-                          <TextField
-                            fullWidth
-                            label="Country"
-                            name="country"
-                            onChange={handleChange}
-                            variant="outlined"
-                            {...params}
-                          />
-                        )}
-                      />
-                    </Grid>
-                    <Grid
-                      item
-                      md={6}
-                      xs={12}
-                    >
-                      <TextField
-                        error={Boolean(touched.state && errors.state)}
-                        fullWidth
-                        helperText={touched.state && errors.state}
-                        label="State/Region"
-                        name="state"
-                        onBlur={handleBlur}
-                        onChange={handleChange}
-                        value={values.state}
-                        variant="outlined"
-                      />
-                    </Grid>
-                    <Grid
-                      item
-                      md={6}
-                      xs={12}
-                    >
-                      <TextField
-                        error={Boolean(touched.city && errors.city)}
-                        fullWidth
-                        helperText={touched.city && errors.city}
-                        label="City"
-                        name="city"
-                        onBlur={handleBlur}
-                        onChange={handleChange}
-                        value={values.city}
-                        variant="outlined"
-                      />
-                    </Grid>
-                    <Grid
-                      item
-                      md={6}
-                      xs={12}
-                    >
-                      <Typography
-                        color="textPrimary"
-                        gutterBottom
-                        variant="subtitle2"
-                      >
-                        Public Profile
-                      </Typography>
-                      <Typography
-                        color="textSecondary"
-                        variant="body2"
-                      >
-                        Means that anyone viewing your profile will
-                        be able to see your contacts details
-                      </Typography>
-                      <Switch
-                        checked={values.isPublic}
-                        color="primary"
-                        edge="start"
-                        name="isPublic"
-                        onChange={handleChange}
-                      />
-                    </Grid>
-                    <Grid
-                      item
-                      md={6}
-                      xs={12}
-                    >
-                      <Typography
-                        color="textPrimary"
-                        gutterBottom
-                        variant="subtitle2"
-                      >
-                        Available to hire
-                      </Typography>
-                      <Typography
-                        color="textSecondary"
-                        variant="body2"
-                      >
-                        Toggling this will let your teammates know
-                        that you are available for acquiring new
-                        projects
-                      </Typography>
-                      <Switch
-                        checked={values.canHire}
-                        color="primary"
-                        edge="start"
-                        name="canHire"
-                        onChange={handleChange}
                       />
                     </Grid>
                   </Grid>

@@ -6,6 +6,19 @@ import { alpha, useTheme } from '@material-ui/core/styles';
 import ArrowRightIcon from '../../../icons/ArrowRight';
 import ChevronDownIcon from '../../../icons/ChevronDown';
 import ChevronUpIcon from '../../../icons/ChevronUp';
+import PropTypes from 'prop-types';
+import { Link as RouterLink } from 'react-router-dom';
+import AcademicCap from 'src/icons/AcademicCap';
+import DocumentText from 'src/icons/DocumentText';
+import Template from 'src/icons/Template';
+import Duplicate from 'src/icons/Duplicate';
+import Calendar from 'src/icons/Calendar';
+import CheckCircle from 'src/icons/CheckCircle';
+import Adjustments from 'src/icons/Adjustments';
+import DotsHorizontal from 'src/icons/DotsHorizontal';
+import ExclamationCircle from 'src/icons/ExclamationCircle';
+import Archive from 'src/icons/Archive';
+import PencilAlt from 'src/icons/PencilAlt';
 
 const LineChart: FC = () => {
   const theme = useTheme();
@@ -129,14 +142,19 @@ const BarChart: FC = () => {
   );
 };
 
-const AnalyticsGeneralOverview: FC = () => (
+interface AnalyticsGeneralOverviewProps {
+  totalNumberOfReports: number;
+  totalNumberOfTimestampedReports: number;
+}
+
+const AnalyticsGeneralOverview: FC<AnalyticsGeneralOverviewProps> = ({ totalNumberOfReports, totalNumberOfTimestampedReports }) => (
   <Grid
     container
     spacing={2}
   >
     <Grid
       item
-      md={3}
+      md={4}
       sm={6}
       xs={12}
     >
@@ -154,17 +172,17 @@ const AnalyticsGeneralOverview: FC = () => (
               color="textPrimary"
               variant="subtitle2"
             >
-              Impressions
+              Uploaded Course Reports
             </Typography>
             <Typography
               color="textPrimary"
               sx={{ mt: 1 }}
               variant="h4"
             >
-              1.9M
+              {totalNumberOfReports}
             </Typography>
           </div>
-          <LineChart />
+          <DocumentText fontSize="large" />
         </Box>
         <Divider />
         <Box
@@ -177,15 +195,17 @@ const AnalyticsGeneralOverview: FC = () => (
             color="primary"
             endIcon={<ArrowRightIcon fontSize="small" />}
             variant="text"
+            to="/dashboard/reports"
+            component={RouterLink}
           >
-            See all visits
+            See course report results
           </Button>
         </Box>
       </Card>
     </Grid>
     <Grid
       item
-      md={3}
+      md={4}
       sm={6}
       xs={12}
     >
@@ -203,17 +223,17 @@ const AnalyticsGeneralOverview: FC = () => (
               color="textPrimary"
               variant="subtitle2"
             >
-              Spent
+              Timestamped Course Reports
             </Typography>
             <Typography
               color="textPrimary"
               sx={{ mt: 1 }}
-              variant="h5"
+              variant="h4"
             >
-              $41.2K
+              {totalNumberOfTimestampedReports}
             </Typography>
           </div>
-          <LineChart />
+          <CheckCircle fontSize="large" />
         </Box>
         <Divider />
         <Box
@@ -232,21 +252,21 @@ const AnalyticsGeneralOverview: FC = () => (
               width: 36
             }}
           >
-            <ChevronUpIcon fontSize="small" />
+            <DotsHorizontal fontSize="small" />
           </Avatar>
           <Typography
             color="textSecondary"
             sx={{ ml: 1 }}
             variant="caption"
           >
-            12% more then last month
+            {(totalNumberOfTimestampedReports / totalNumberOfReports) * 100}%
           </Typography>
         </Box>
       </Card>
     </Grid>
     <Grid
       item
-      md={3}
+      md={4}
       sm={6}
       xs={12}
     >
@@ -264,17 +284,17 @@ const AnalyticsGeneralOverview: FC = () => (
               color="textPrimary"
               variant="subtitle2"
             >
-              Engagements
+              Pending Course Reports
             </Typography>
             <Typography
               color="textPrimary"
               sx={{ mt: 1 }}
-              variant="h5"
+              variant="h4"
             >
-              36,6K
+              {totalNumberOfReports - totalNumberOfTimestampedReports}
             </Typography>
           </div>
-          <LineChart />
+          <PencilAlt fontSize="large" />
         </Box>
         <Divider />
         <Box
@@ -288,80 +308,19 @@ const AnalyticsGeneralOverview: FC = () => (
           <Avatar
             sx={{
               backgroundColor: (theme) => alpha(theme.palette.error.main, 0.08),
-              color: 'error.main',
+              color: 'warning.main',
               height: 36,
               width: 36
             }}
           >
-            <ChevronDownIcon fontSize="small" />
+            <DotsHorizontal fontSize="small" />
           </Avatar>
           <Typography
             color="textSecondary"
             sx={{ ml: 1 }}
             variant="caption"
           >
-            30% less then last month
-          </Typography>
-        </Box>
-      </Card>
-    </Grid>
-    <Grid
-      item
-      md={3}
-      sm={6}
-      xs={12}
-    >
-      <Card>
-        <Box
-          sx={{
-            alignItems: 'center',
-            display: 'flex',
-            justifyContent: 'space-between',
-            p: 3
-          }}
-        >
-          <div>
-            <Typography
-              color="textPrimary"
-              variant="subtitle2"
-            >
-              Conversions
-            </Typography>
-            <Typography
-              color="textPrimary"
-              sx={{ mt: 1 }}
-              variant="h5"
-            >
-              131,3K
-            </Typography>
-          </div>
-          <BarChart />
-        </Box>
-        <Divider />
-        <Box
-          sx={{
-            alignItems: 'center',
-            display: 'flex',
-            px: 3,
-            py: 2
-          }}
-        >
-          <Avatar
-            sx={{
-              backgroundColor: (theme) => alpha(theme.palette.success.main, 0.08),
-              color: 'success.main',
-              height: 36,
-              width: 36
-            }}
-          >
-            <ChevronUpIcon fontSize="small" />
-          </Avatar>
-          <Typography
-            color="textSecondary"
-            sx={{ ml: 1 }}
-            variant="caption"
-          >
-            12% more then last month
+            {((totalNumberOfReports - totalNumberOfTimestampedReports) / totalNumberOfReports) * 100}%
           </Typography>
         </Box>
       </Card>
@@ -370,3 +329,8 @@ const AnalyticsGeneralOverview: FC = () => (
 );
 
 export default AnalyticsGeneralOverview;
+
+AnalyticsGeneralOverview.propTypes = {
+  totalNumberOfReports: PropTypes.number.isRequired,
+  totalNumberOfTimestampedReports: PropTypes.number.isRequired
+};

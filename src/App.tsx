@@ -1,19 +1,14 @@
-import { useEffect } from 'react';
 import type { FC } from 'react';
 import { useRoutes } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { CssBaseline, ThemeProvider } from '@material-ui/core';
-import './i18n';
-import RTL from './components/RTL';
-import SettingsDrawer from './components/SettingsDrawer';
 import SplashScreen from './components/SplashScreen';
-import { gtmConfig } from './config';
 import useAuth from './hooks/useAuth';
 import useScrollReset from './hooks/useScrollReset';
 import useSettings from './hooks/useSettings';
-import gtm from './lib/gtm';
 import routes from './routes';
 import { createCustomTheme } from './theme';
+import AuthGuard from './components/AuthGuard';
 
 const App: FC = () => {
   const content = useRoutes(routes);
@@ -21,10 +16,6 @@ const App: FC = () => {
   const auth = useAuth();
 
   useScrollReset();
-
-  useEffect(() => {
-    gtm.initialize(gtmConfig);
-  }, []);
 
   const theme = createCustomTheme({
     direction: settings.direction,
@@ -35,12 +26,11 @@ const App: FC = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <RTL direction={settings.direction}>
-        <CssBaseline />
-        <Toaster position="top-center" />
-        <SettingsDrawer />
+      <CssBaseline />
+      <Toaster position="top-center" />
+      <AuthGuard>
         {auth.isInitialized ? content : <SplashScreen />}
-      </RTL>
+      </AuthGuard>
     </ThemeProvider>
   );
 };

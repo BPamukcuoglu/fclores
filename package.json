@@ -1,7 +1,7 @@
 {
-  "name": "@devias/material-kit-pro-react",
+  "name": "boun-blockhain-based-assesstment",
   "version": "4.1.0",
-  "author": "Devias",
+  "author": "BPamukcuoglu",
   "private": true,
   "scripts": {
     "lint": "eslint ./src",
@@ -58,6 +58,7 @@
     "aws-amplify": "^3.0.20",
     "date-fns": "^2.21.3",
     "draft-js": "^0.11.7",
+    "ethers": "^5.7.2",
     "firebase": "^8.2.3",
     "formik": "^2.2.7",
     "gray-matter": "^4.0.3",
@@ -91,6 +92,7 @@
     "stylis": "^4.0.10",
     "stylis-plugin-rtl": "^2.1.0",
     "typescript": "^4.2.4",
+    "web3": "^4.0.1",
     "yup": "^0.32.9"
   },
   "devDependencies": {

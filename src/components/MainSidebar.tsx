@@ -36,66 +36,9 @@ const MainSidebar: FC<MainSidebarProps> = (props) => {
         }
       }}
     >
-      <Box
-        sx={{
-          alignItems: 'flex-start',
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%',
-          p: 2
-        }}
-      >
         <RouterLink to="/">
           <Logo />
         </RouterLink>
-        <Box
-          sx={{
-            display: 'flex',
-            pb: 2,
-            pt: 3
-          }}
-        >
-          <Link
-            color="textSecondary"
-            component={RouterLink}
-            to="/browse"
-            underline="none"
-            variant="body1"
-          >
-            Browse Components
-          </Link>
-          <Chip
-            color="primary"
-            label="NEW"
-            size="small"
-            sx={{
-              maxHeight: 20,
-              ml: 1,
-              mr: 2
-            }}
-          />
-        </Box>
-        <Link
-          color="textSecondary"
-          component={RouterLink}
-          to="/docs"
-          underline="none"
-          variant="body1"
-        >
-          Documentation
-        </Link>
-        <Button
-          color="primary"
-          component="a"
-          href="https://material-ui.com/store/items/devias-kit-pro"
-          size="small"
-          sx={{ mt: 4 }}
-          target="_blank"
-          variant="contained"
-        >
-          Get the kit
-        </Button>
-      </Box>
     </Drawer>
   );
 };

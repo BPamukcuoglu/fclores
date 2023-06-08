@@ -1,28 +1,33 @@
-import type { FC } from 'react';
+import { FC, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDropzone } from 'react-dropzone';
 import type { DropzoneOptions } from 'react-dropzone';
 import {
   Box,
   Button,
+  Grid,
   IconButton,
   Link,
-  List,
   ListItem,
   ListItemIcon,
   ListItemText,
+  TextField,
   Tooltip,
   Typography
 } from '@material-ui/core';
 import DuplicateIcon from '../icons/Duplicate';
 import XIcon from '../icons/X';
 import bytesToSize from '../utils/bytesToSize';
+import axios from 'axios';
+import useAuth from '../hooks/useAuth';
+import toast from 'react-hot-toast';
 
 interface FileDropzoneProps extends DropzoneOptions {
   files?: any[];
   onRemove?: (file: any) => void;
   onRemoveAll?: () => void;
   onUpload?: () => void;
+  close?: any;
 }
 
 const FileDropzone: FC<FileDropzoneProps> = (props) => {
@@ -46,6 +51,7 @@ const FileDropzone: FC<FileDropzoneProps> = (props) => {
     onRemoveAll,
     onUpload,
     preventDropOnDocument,
+    close,
     ...other
   } = props;
 
@@ -58,6 +64,40 @@ const FileDropzone: FC<FileDropzoneProps> = (props) => {
     minSize,
     onDrop
   });
+
+  const { user } = useAuth();
+
+  const [selectedFile, setSelectedFile] = useState<any>();
+  const [year, setYear] = useState<string>();
+  const [semester, setSemester] = useState<string>();
+  const [department, setDepartment] = useState<string>();
+  const [code, setCode] = useState<string>();
+
+  const handleFileChange = (event) => {
+    setSelectedFile(event.target.files[0]);
+  };
+
+  const handleFileUpload = () => {
+    if (year && semester && department && code) {
+      const formData = new FormData();
+      formData.append('file', selectedFile, selectedFile.name);
+      formData.append('courseCode', department.concat(code));
+      formData.append('year', year);
+      formData.append('instructor', user.name.split(' ').reverse()[0]);
+      formData.append('semester', year.concat('-').concat(semester))
+
+      axios.post('http://localhost:3000/reports/upload', formData)
+        .then((response) => {
+          close(false);
+          toast.success("File uploaded succesfully");
+        })
+        .catch((error) => {
+          toast.error(error.message);
+        });
+    } else {
+      toast.error("All fields are mandatory!")
+    }
+  };
 
   return (
     <div {...other}>
@@ -86,7 +126,10 @@ const FileDropzone: FC<FileDropzoneProps> = (props) => {
         }}
         {...getRootProps()}
       >
-        <input {...getInputProps()} />
+        <input
+          {...getInputProps()}
+          onChange={handleFileChange}
+        />
         <Box
           sx={{
             '& img': {
@@ -129,43 +172,128 @@ const FileDropzone: FC<FileDropzoneProps> = (props) => {
           </Box>
         </Box>
       </Box>
-      {files.length > 0 && (
-        <Box sx={{ mt: 2 }}>
-          <List>
-            {files.map((file) => (
-              <ListItem
-                key={file.path}
-                sx={{
-                  border: 1,
-                  borderColor: 'divider',
-                  borderRadius: 1,
-                  '& + &': {
-                    mt: 1
-                  }
-                }}
+      {selectedFile && (
+        <Box
+          sx={{
+            mt: 2,
+          }}
+        >
+          <ListItem
+            key={selectedFile.path}
+            sx={{
+              border: 1,
+              borderColor: 'divider',
+              borderRadius: 1,
+              '& + &': {
+                mt: 1
+              }
+            }}
+          >
+            <ListItemIcon>
+              <DuplicateIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText
+              primary={selectedFile.name}
+              primaryTypographyProps={{
+                color: 'textPrimary',
+                variant: 'subtitle2'
+              }}
+              secondary={bytesToSize(selectedFile.size)}
+            />
+            <Tooltip title="Remove">
+              <IconButton
+                edge="end"
+                onClick={() => { setSelectedFile(null) }}
               >
-                <ListItemIcon>
-                  <DuplicateIcon fontSize="small" />
-                </ListItemIcon>
-                <ListItemText
-                  primary={file.name}
-                  primaryTypographyProps={{
-                    color: 'textPrimary',
-                    variant: 'subtitle2'
-                  }}
-                  secondary={bytesToSize(file.size)}
-                />
-                <Tooltip title="Remove">
-                  <IconButton
-                    edge="end"
-                    onClick={() => onRemove && onRemove(file)}
+                <XIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </ListItem>
+          <Box
+            sx={{
+              backgroundColor: 'background.paper',
+              p: 2,
+              borderRadius: 1,
+              mt: 2
+            }}
+          >
+            <Grid container>
+              <Grid
+                item
+                md={12}
+                xs={12}
+              >
+                <Grid
+                  container
+                  spacing={4}
+                >
+                  <Grid
+                    item
+                    sm={12}
+                    xs={12}
                   >
-                    <XIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              </ListItem>
-            ))}
-          </List>
+                    <TextField
+                      fullWidth
+                      label="Instructor"
+                      variant="outlined"
+                      value={user.name}
+                      disabled
+                    />
+                  </Grid>
+                  <Grid
+                    item
+                    sm={6}
+                    xs={6}
+                  >
+                    <TextField
+                      fullWidth
+                      label="Department"
+                      variant="outlined"
+                      onChange={(e) => { setDepartment(e.target.value) }}
+                    />
+                  </Grid>
+                  <Grid
+                    item
+                    sm={6}
+                    xs={6}
+                  >
+                    <TextField
+                      fullWidth
+                      label="Course Code"
+                      variant="outlined"
+                      onChange={(e) => { setCode(e.target.value) }}
+                    />
+                  </Grid>
+                  <Grid
+                    item
+                    sm={6}
+                    xs={6}
+                  >
+                    <TextField
+                      fullWidth
+                      label="Year"
+                      helperText="####-####"
+                      variant="outlined"
+                      onChange={(e) => { setYear(e.target.value) }}
+                    />
+                  </Grid>
+                  <Grid
+                    item
+                    sm={6}
+                    xs={6}
+                  >
+                    <TextField
+                      fullWidth
+                      label="Semester"
+                      helperText="FALL/SPRING/SUMMER"
+                      variant="outlined"
+                      onChange={(e) => { setSemester(e.target.value) }}
+                    />
+                  </Grid>
+                </Grid>
+              </Grid>
+            </Grid>
+          </Box>
           <Box
             sx={{
               display: 'flex',
@@ -175,16 +303,7 @@ const FileDropzone: FC<FileDropzoneProps> = (props) => {
           >
             <Button
               color="primary"
-              onClick={onRemoveAll}
-              size="small"
-              type="button"
-              variant="text"
-            >
-              Remove All
-            </Button>
-            <Button
-              color="primary"
-              onClick={onUpload}
+              onClick={handleFileUpload}
               size="small"
               sx={{ ml: 2 }}
               type="button"
@@ -221,7 +340,8 @@ FileDropzone.propTypes = {
   onRemove: PropTypes.func,
   onRemoveAll: PropTypes.func,
   onUpload: PropTypes.func,
-  preventDropOnDocument: PropTypes.bool
+  preventDropOnDocument: PropTypes.bool,
+  close: PropTypes.func
 };
 
 FileDropzone.defaultProps = {

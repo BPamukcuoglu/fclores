@@ -7,22 +7,13 @@ import type { Theme } from '@material-ui/core';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import ReceiptIcon from '@material-ui/icons/Receipt';
 import useAuth from '../../hooks/useAuth';
-import BriefcaseIcon from '../../icons/Briefcase';
-import CalendarIcon from '../../icons/Calendar';
 import ChartPieIcon from '../../icons/ChartPie';
 import ChartSquareBarIcon from '../../icons/ChartSquareBar';
-import ChatAltIcon from '../../icons/ChatAlt';
-import ClipboardListIcon from '../../icons/ClipboardList';
-import FolderOpenIcon from '../../icons/FolderOpen';
-import MailIcon from '../../icons/Mail';
-import ShareIcon from '../../icons/Share';
-import ShoppingBagIcon from '../../icons/ShoppingBag';
-import ShoppingCartIcon from '../../icons/ShoppingCart';
 import UserIcon from '../../icons/User';
-import UsersIcon from '../../icons/Users';
 import Logo from '../Logo';
 import NavSection from '../NavSection';
 import Scrollbar from '../Scrollbar';
+import DocumentText from 'src/icons/DocumentText';
 
 interface DashboardSidebarProps {
   onMobileClose: () => void;
@@ -34,11 +25,6 @@ const sections = [
     title: 'General',
     items: [
       {
-        title: 'Overview',
-        path: '/dashboard',
-        icon: <ChartSquareBarIcon fontSize="small" />
-      },
-      {
         title: 'Analytics',
         path: '/dashboard/analytics',
         icon: <ChartPieIcon fontSize="small" />
@@ -47,6 +33,11 @@ const sections = [
         title: 'Account',
         path: '/dashboard/account',
         icon: <UserIcon fontSize="small" />
+      },
+      {
+        title: 'LaTeX Generator',
+        path: '/dashboard/latexGenerator',
+        icon: <DocumentText fontSize="small" />
       }
     ]
   },
@@ -57,16 +48,11 @@ const sections = [
         title: 'Reports',
         path: '/dashboard/reports',
         icon: <ReceiptIcon fontSize="small" />,
-        children: [
-          {
-            title: 'List',
-            path: '/dashboard/reports'
-          },
-          {
-            title: 'Details',
-            path: '/dashboard/reports/1'
-          }
-        ]
+      },
+      {
+        title: 'PC Weights',
+        path: '/dashboard/pcweights',
+        icon: <ReceiptIcon fontSize="small" />,
       }
     ]
   },
@@ -89,7 +75,8 @@ const DashboardSidebar: FC<DashboardSidebarProps> = (props) => {
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        height: '100%'
+        height: '100%',
+        zIndex: -100
       }}
     >
       <Scrollbar options={{ suppressScrollX: true }}>
@@ -125,7 +112,7 @@ const DashboardSidebar: FC<DashboardSidebarProps> = (props) => {
           >
             <RouterLink to="/dashboard/account">
               <Avatar
-                src={user.avatar}
+                src={user?.avatar}
                 sx={{
                   cursor: 'pointer',
                   height: 48,
@@ -138,7 +125,7 @@ const DashboardSidebar: FC<DashboardSidebarProps> = (props) => {
                 color="textPrimary"
                 variant="subtitle2"
               >
-                {user.name}
+                {user?.name}
               </Typography>
               <Typography
                 color="textSecondary"
@@ -170,12 +157,6 @@ const DashboardSidebar: FC<DashboardSidebarProps> = (props) => {
             variant="subtitle2"
           >
             Need Help?
-          </Typography>
-          <Typography
-            color="textSecondary"
-            variant="body2"
-          >
-            Check our docs
           </Typography>
           <Button
             color="primary"

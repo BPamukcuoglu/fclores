@@ -1,5 +1,5 @@
 export { default as AnalyticsGeneralOverview } from './AnalyticsGeneralOverview';
-export { default as AnalyticsMostVisitedPages } from './AnalyticsMostVisitedPages';
-export { default as AnalyticsSocialMediaSources } from './AnalyticsSocialMediaSources';
-export { default as AnalyticsTrafficSources } from './AnalyticsTrafficSources';
-export { default as AnalyticsVisitsByCountry } from './AnalyticsVisitsByCountry';
+export { default as AnalyticsListOfPC } from './AnalyticsListOfPC';
+export { default as AnalyticsCourseCLO } from './AnalyticsCourseCLO';
+export { default as AnalyticsYearlyComparison } from './AnalyticsYearlyComparison';
+export { default as AnalyticsShortViewPerCourse } from './AnalyticsShortViewPerCourse';

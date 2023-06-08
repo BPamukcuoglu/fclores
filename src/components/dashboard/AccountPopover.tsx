@@ -12,17 +12,31 @@ import {
   ListItemText,
   MenuItem,
   Popover,
+  TextField,
   Typography
 } from '@material-ui/core';
 import useAuth from '../../hooks/useAuth';
 import CogIcon from '../../icons/Cog';
-import UserIcon from '../../icons/User';
+import useSettings from '../../hooks/useSettings';
+import { THEMES } from '../../constants';
+
+const getValues = (settings) => (
+  {
+    compact: settings.compact,
+    direction: settings.direction,
+    responsiveFontSizes: settings.responsiveFontSizes,
+    roundedCorners: settings.roundedCorners,
+    theme: settings.theme
+  }
+);
 
 const AccountPopover: FC = () => {
   const anchorRef = useRef<HTMLButtonElement | null>(null);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState<boolean>(false);
+  const { settings, saveSettings } = useSettings();
+  const [values, setValues] = useState(getValues(settings));
 
   const handleOpen = (): void => {
     setOpen(true);
@@ -32,11 +46,18 @@ const AccountPopover: FC = () => {
     setOpen(false);
   };
 
+  const handleChange = (field, value): void => {
+    setValues({
+      ...values,
+      [field]: value
+    });
+  };
+
   const handleLogout = async (): Promise<void> => {
     try {
       handleClose();
       await logout();
-      navigate('/');
+      navigate('/authentication/login');
     } catch (err) {
       console.error(err);
       toast.error('Unable to logout.');
@@ -86,7 +107,7 @@ const AccountPopover: FC = () => {
             color="textSecondary"
             variant="subtitle2"
           >
-            Devias
+            {user?.email}
           </Typography>
         </Box>
         <Divider />
@@ -109,6 +130,35 @@ const AccountPopover: FC = () => {
               )}
             />
           </MenuItem>
+        </Box>
+        <Box sx={{ mt: 3 }}>
+          <TextField
+            fullWidth
+            label="Theme"
+            name="theme"
+            onChange={(event): void => handleChange(
+              'theme',
+              event.target.value
+            )}
+            select
+            SelectProps={{ native: true }}
+            value={values.theme}
+            variant="outlined"
+          >
+            {Object.keys(THEMES).map((theme) => (
+              <option
+                key={theme}
+                value={theme}
+              >
+                {
+                  theme
+                    .split('_')
+                    .map((w) => w[0].toUpperCase() + w.substr(1).toLowerCase())
+                    .join(' ')
+                }
+              </option>
+            ))}
+          </TextField>
         </Box>
         <Box sx={{ p: 2 }}>
           <Button

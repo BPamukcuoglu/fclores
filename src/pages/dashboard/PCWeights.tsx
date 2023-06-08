@@ -19,41 +19,43 @@ import {
   AnalyticsYearlyComparison
 } from '../../components/dashboard/analytics';
 import useSettings from '../../hooks/useSettings';
+import ChevronDownIcon from '../../icons/ChevronDown';
 import ChevronRightIcon from '../../icons/ChevronRight';
 import DownloadIcon from '../../icons/Download';
 import { reportApi } from 'src/apis/reportApi';
 import useMounted from 'src/hooks/useMounted';
 import { Report } from 'src/types/report';
-import AnalyticsYearlyComparisonByLecture from 'src/components/dashboard/analytics/AnalyticsComparisonByLecture';
+import PCWeightsCourses from 'src/components/dashboard/pcweights/PCWeightsCourses';
 
-const Analytics: FC = () => {
+const PCWeights: FC = () => {
   const mounted = useMounted();
   const { settings } = useSettings();
   const [pcData, setPCData] = useState();
   const [reports, setReports] = useState<Report[]>([]);
 
-  const getReport = useCallback(async () => {
-    try {
-      const data = await reportApi.getCollectives();
-      const reportsData = await reportApi.getReports();
+  // const getReport = useCallback(async () => {
+  //   try {
+  //     const data = await reportApi.getCollectives();
+  //     const reportsData = await reportApi.getReports();
 
-      console.log(reportsData)
-      if (mounted.current) {
-        setPCData(data)
-        setReports(reportsData)
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  }, [mounted]);
+  //     console.log(data)
+  //     console.log(reportsData)
+  //     if (mounted.current) {
+  //       setPCData(data)
+  //       setReports(reportsData)
+  //     }
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // }, [mounted]);
 
-  useEffect(() => {
-    getReport();
-  }, [getReport]);
+  // useEffect(() => {
+  //   getReport();
+  // }, [getReport]);
 
-  if (!reports || !pcData) {
-    return null;
-  }
+  // if (!reports || !pcData) {
+  //   return null;
+  // }
 
   return (
     <>
@@ -78,7 +80,7 @@ const Analytics: FC = () => {
                 color="textPrimary"
                 variant="h5"
               >
-                Analytics
+                Performance Criteria
               </Typography>
               <Breadcrumbs
                 aria-label="breadcrumb"
@@ -97,7 +99,7 @@ const Analytics: FC = () => {
                   color="textSecondary"
                   variant="subtitle2"
                 >
-                  Analytics
+                  Performance Criteria
                 </Typography>
               </Breadcrumbs>
             </Grid>
@@ -111,47 +113,18 @@ const Analytics: FC = () => {
               </Button>
             </Grid>
           </Grid>
-          <Box sx={{ py: 3 }}>
-            <AnalyticsGeneralOverview
-              totalNumberOfReports={reports.length}
-              totalNumberOfTimestampedReports={reports.filter(((a) => a.status === 'timestamped')).length}
-            />
-          </Box>
           <Grid
             container
             spacing={3}
+            paddingTop={4}
           >
-            <Grid
-              item
-              xl={9}
-              md={8}
-              xs={12}
-            >
-              <AnalyticsYearlyComparison
-                pcData={pcData}
-                field="clos"
-                sx={{ height: '100%' }}
-              />
-            </Grid>
-            <Grid
-              item
-              xl={3}
-              md={4}
-              xs={12}
-            >
-              <AnalyticsShortViewPerCourse reports={reports} />
-            </Grid>
             <Grid
               item
               xl={12}
               md={12}
               xs={12}
             >
-              <AnalyticsYearlyComparison
-                pcData={pcData}
-                field="pcs"
-                sx={{ height: '100%' }}
-              />
+              <AnalyticsListOfPC />
             </Grid>
             <Grid
               item
@@ -159,7 +132,7 @@ const Analytics: FC = () => {
               md={8}
               xs={12}
             >
-              <AnalyticsYearlyComparisonByLecture reports={reports} />
+              <AnalyticsListOfPC />
             </Grid>
             <Grid
               item
@@ -167,7 +140,7 @@ const Analytics: FC = () => {
               md={4}
               xs={12}
             >
-              <AnalyticsCourseCLO reports={reports} />
+              <PCWeightsCourses />
             </Grid>
           </Grid>
         </Container>
@@ -176,4 +149,4 @@ const Analytics: FC = () => {
   );
 };
 
-export default Analytics;
+export default PCWeights;

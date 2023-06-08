@@ -14,14 +14,12 @@ import {
   Typography
 } from '@material-ui/core';
 import {
-  AccountBillingSettings,
   AccountGeneralSettings,
   AccountNotificationsSettings,
   AccountSecuritySettings
 } from '../../components/dashboard/account';
 import useSettings from '../../hooks/useSettings';
 import ChevronRightIcon from '../../icons/ChevronRight';
-import gtm from '../../lib/gtm';
 
 const tabs = [
   { label: 'General', value: 'general' },
@@ -33,10 +31,6 @@ const Account: FC = () => {
   const { settings } = useSettings();
   const [currentTab, setCurrentTab] = useState<string>('general');
 
-  useEffect(() => {
-    gtm.push({ event: 'page_view' });
-  }, []);
-
   const handleTabsChange = (event: ChangeEvent<{}>, value: string): void => {
     setCurrentTab(value);
   };
@@ -44,7 +38,7 @@ const Account: FC = () => {
   return (
     <>
       <Helmet>
-        <title>Dashboard: Account | Material Kit Pro</title>
+        <title>BOUN Blockchain Based Assestment</title>
       </Helmet>
       <Box
         sx={{
@@ -109,7 +103,6 @@ const Account: FC = () => {
           <Divider />
           <Box sx={{ mt: 3 }}>
             {currentTab === 'general' && <AccountGeneralSettings />}
-            {currentTab === 'billing' && <AccountBillingSettings />}
             {currentTab === 'notifications' && <AccountNotificationsSettings />}
             {currentTab === 'security' && <AccountSecuritySettings />}
           </Box>

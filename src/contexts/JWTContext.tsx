@@ -2,7 +2,7 @@ import { createContext, useEffect, useReducer } from 'react';
 import type { FC, ReactNode } from 'react';
 import PropTypes from 'prop-types';
 import type { User } from '../types/user';
-import { authApi } from '../__fakeApi__/authApi';
+import { authApi } from '../apis/authApi';
 
 interface State {
   isInitialized: boolean;

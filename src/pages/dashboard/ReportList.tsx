@@ -11,35 +11,29 @@ import {
   Link,
   Typography
 } from '@material-ui/core';
-import { invoiceApi } from '../../__fakeApi__/invoiceApi';
-import { InvoiceListTable } from '../../components/dashboard/report';
+import { reportApi } from '../../apis/reportApi';
+import { ReportListTable } from '../../components/dashboard/report';
 import useMounted from '../../hooks/useMounted';
 import useSettings from '../../hooks/useSettings';
 import ChevronRightIcon from '../../icons/ChevronRight';
 import DownloadIcon from '../../icons/Download';
 import PlusIcon from '../../icons/Plus';
-import UploadIcon from '../../icons/Upload';
-import gtm from '../../lib/gtm';
-import type { Invoice } from '../../types/invoice';
+import type { Report } from '../../types/report';
 import FileDropzone from 'src/components/FileDropzone';
 import X from 'src/icons/X';
 
-const InvoiceList: FC = () => {
+const ReportList: FC = () => {
   const mounted = useMounted();
   const { settings } = useSettings();
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [reports, setReports] = useState<Report[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
 
-  useEffect(() => {
-    gtm.push({ event: 'page_view' });
-  }, []);
-
-  const getInvoices = useCallback(async () => {
+  const getReports = useCallback(async () => {
     try {
-      const data = await invoiceApi.getInvoices();
-
+      const data = await reportApi.getReports();
       if (mounted.current) {
-        setInvoices(data);
+        setReports(data as any);
+        window.localStorage.setItem("reports", JSON.stringify(data))
       }
     } catch (err) {
       console.error(err);
@@ -47,8 +41,8 @@ const InvoiceList: FC = () => {
   }, [mounted]);
 
   useEffect(() => {
-    getInvoices();
-  }, [getInvoices]);
+    getReports();
+  }, [getReports]);
 
   return (
     <>
@@ -61,7 +55,7 @@ const InvoiceList: FC = () => {
             width: '100%',
             height: '100%',
             backgroundColor: 'rgba(0, 0, 0, 0.9)',
-            zIndex: 9999
+            zIndex: 5000
           }}
           onClick={() => { setIsDialogOpen(false) }}
         >
@@ -74,7 +68,7 @@ const InvoiceList: FC = () => {
               backgroundColor: 'background.default',
               width: '800px',
               padding: '20px',
-              zIndex: 9999
+              zIndex: 5000
             }}
             onClick={(e) => { e.stopPropagation() }}
           >
@@ -87,7 +81,12 @@ const InvoiceList: FC = () => {
             >
               Close
             </Button>
-            <FileDropzone />
+            <FileDropzone
+              multiple={false}
+              accept=".xlsx"
+              maxFiles={1}
+              close={setIsDialogOpen}
+            />
           </Box>
         </Box>
       )}
@@ -176,7 +175,7 @@ const InvoiceList: FC = () => {
             </Grid>
           </Grid>
           <Box sx={{ mt: 3 }}>
-            <InvoiceListTable invoices={invoices} />
+            <ReportListTable reports={reports} />
           </Box>
         </Container>
       </Box>
@@ -184,4 +183,4 @@ const InvoiceList: FC = () => {
   );
 };
 
-export default InvoiceList;
+export default ReportList;

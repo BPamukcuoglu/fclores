@@ -1,44 +1,66 @@
-import { useState, useEffect, useCallback } from 'react';
-import type { FC } from 'react';
+import { useCallback, useState, useEffect } from 'react';
+import type { FC, ChangeEvent } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer';
 import {
   Box,
   Breadcrumbs,
   Button,
   Container,
-  Dialog,
   Divider,
   Grid,
+  Input,
   Link,
+  Tab,
+  Tabs,
+  TextField,
   Typography
 } from '@material-ui/core';
-import { invoiceApi } from '../../__fakeApi__/invoiceApi';
-import { InvoicePDF } from '../../components/dashboard/report';
+import { reportApi } from '../../apis/reportApi';
 import useMounted from '../../hooks/useMounted';
-import useSettings from '../../hooks/useSettings';
-import ArrowLeftIcon from '../../icons/ArrowLeft';
 import ChevronRightIcon from '../../icons/ChevronRight';
-import gtm from '../../lib/gtm';
-import type { Invoice } from '../../types/invoice';
+import DownloadIcon from '../../icons/Download';
+import useSettings from '../../hooks/useSettings';
+import { Report } from 'src/types/report';
+import ExcelToTable from 'src/components/ExcelToTable';
+import Clipboard from 'src/icons/Clipboard';
+import Clock from 'src/icons/Clock';
+import { blockchainApi } from '../../apis/blockchainApi';
+import X from 'src/icons/X';
+import toast from 'react-hot-toast';
 
-const InvoiceDetails: FC = () => {
+const tabs = [
+  { label: 'CLO Surveys', value: 'cloSurveys' },
+  { label: 'CLO Weights', value: 'cloWeights' },
+  { label: 'PC Weights', value: 'pcWeights' },
+  { label: 'Grades', value: 'grades' },
+  { label: 'Discretization', value: 'discretization' }
+];
+
+const ReportDetails: FC = () => {
   const mounted = useMounted();
   const { settings } = useSettings();
-  const [invoice, setInvoice] = useState<Invoice | null>(null);
-  const [viewPDF, setViewPDF] = useState<boolean>(false);
+  const [report, setReport] = useState<Report | null>(null);
+  const [currentTab, setCurrentTab] = useState<string>('cloSurveys');
+  const [excelData, setExcelData] = useState<any>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+  const [singleLatex, setSingleLatex] = useState<any>("");
 
-  useEffect(() => {
-    gtm.push({ event: 'page_view' });
-  }, []);
+  const dataCloSurveys = excelData?.find((a) => a.name === "clo-surveys").data
+  const dataPCWeights = excelData?.find((a) => a.name === "PC-weights").data
+  const dataCLOWeights = excelData?.find((a) => a.name === "CLO-weights").data
+  const dataDiscretization = excelData?.find((a) => a.name === "discretization").data
+  const dataGrades = excelData?.find((a) => a.name === "grades").data
 
-  const getInvoice = useCallback(async () => {
+  const getReport = useCallback(async () => {
     try {
-      const data = await invoiceApi.getInvoice();
+      const id = window.location.pathname.split('/').reverse()[0]
+      const data = await reportApi.getReport(Number(id));
+
+      setExcelData(JSON.parse(data.excelRaw))
 
       if (mounted.current) {
-        setInvoice(data);
+        setReport(data);
       }
     } catch (err) {
       console.error(err);
@@ -46,17 +68,125 @@ const InvoiceDetails: FC = () => {
   }, [mounted]);
 
   useEffect(() => {
-    getInvoice();
-  }, [getInvoice]);
+    getReport();
+  }, [getReport]);
 
-  if (!invoice) {
+  const handleTabsChange = (event: ChangeEvent<{}>, value: string): void => {
+    setCurrentTab(value);
+  };
+
+  const handleTimestamp = async () => {
+    await blockchainApi.certify(report.checksum, report.id);
+  }
+
+  const handleVerify = async () => {
+    await blockchainApi.verify(report.txnId);
+  }
+
+  const handleDownload = () => {
+    const content = singleLatex;
+    const filename = "latex-template.tex";
+    const blob = new Blob([content], { type: 'text/x-latex' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  const handleLatex = async () => {
+    const latexString = await reportApi.getLatexSingle([report.semester], [report.department.concat(report.course)], 'pc');
+    if (latexString.report) {
+      setSingleLatex(latexString.report)
+      setIsDialogOpen(true);
+    }
+  }
+
+  if (!report) {
     return null;
   }
 
   return (
     <>
+      {isDialogOpen && (
+        <Box
+          sx={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.9)',
+            zIndex: 5000,
+            overflow: "hidden"
+          }}
+          onClick={() => { setIsDialogOpen(false) }}
+        >
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              backgroundColor: 'background.default',
+              width: '80%',
+              padding: '20px',
+              zIndex: 5000,
+              overflow: "hidden"
+            }}
+            onClick={(e) => { e.stopPropagation() }}
+          >
+            <Button
+              color="primary"
+              startIcon={<X fontSize="small" />}
+              sx={{ m: 1 }}
+              variant="text"
+              onClick={() => { setIsDialogOpen(false) }}
+            >
+              Close
+            </Button>
+            <Button
+              color="primary"
+              startIcon={<Clipboard fontSize="small" />}
+              sx={{ m: 1 }}
+              variant="text"
+              onClick={() => { navigator.clipboard.writeText(singleLatex); toast.success("Copied!") }}
+            >
+              Copy
+            </Button>
+            <Button
+              color="primary"
+              startIcon={<DownloadIcon fontSize="small" />}
+              sx={{ m: 1 }}
+              variant="text"
+              onClick={handleDownload}
+            >
+              Download
+            </Button>
+            <Box
+              sx={{
+                backgroundColor: 'background.paper',
+                p: 2,
+                borderRadius: 1,
+                mt: 2,
+                overflow: "hidden"
+              }}
+            >
+              <Input
+                style={{ overflow: "hidden" }}
+                fullWidth
+                maxRows={20}
+                multiline
+                disabled
+                value={singleLatex}
+              />
+            </Box>
+          </Box>
+        </Box>
+      )}
       <Helmet>
-        <title>Dashboard: Invoice Details | Material Kit Pro</title>
+        <title>Report Details</title>
       </Helmet>
       <Box
         sx={{
@@ -76,7 +206,7 @@ const InvoiceDetails: FC = () => {
                 color="textPrimary"
                 variant="h5"
               >
-                Invoice Details
+                {report.semester.concat(` / ${report.department} ${report.course}`)}
               </Typography>
               <Breadcrumbs
                 aria-label="breadcrumb"
@@ -99,81 +229,130 @@ const InvoiceDetails: FC = () => {
                 >
                   Management
                 </Link>
+                <Link
+                  color="textPrimary"
+                  component={RouterLink}
+                  variant="subtitle2"
+                  to="/dashboard/reports"
+                >
+                  Reports
+                </Link>
                 <Typography
                   color="textSecondary"
                   variant="subtitle2"
                 >
-                  Invoices
+                  Report
                 </Typography>
               </Breadcrumbs>
+              {report.status === "timestamped" && (
+                <Typography
+                  color="textSecondary"
+                  variant="subtitle2"
+                >
+                  TxnId: {report.txnId}
+                </Typography>
+              )}
             </Grid>
             <Grid item>
               <Box sx={{ m: -1 }}>
                 <Button
                   color="primary"
-                  onClick={(): void => setViewPDF(true)}
+                  startIcon={<Clipboard fontSize="small" />}
                   sx={{ m: 1 }}
-                  variant="outlined"
+                  variant="contained"
+                  onClick={handleLatex}
                 >
-                  Preview PDF
+                  Generate LaTeX Template
                 </Button>
-                <PDFDownloadLink
-                  document={<InvoicePDF invoice={invoice} />}
-                  fileName="invoice"
-                  style={{ textDecoration: 'none' }}
-                >
+                {report.status === "pending" && (
                   <Button
                     color="primary"
+                    startIcon={<Clock fontSize="small" />}
                     sx={{ m: 1 }}
                     variant="contained"
+                    onClick={handleTimestamp}
                   >
-                    Download PDF
+                    Timestamp
                   </Button>
-                </PDFDownloadLink>
+                )}
+                {report.status === "timestamped" && (
+                  <Button
+                    color="primary"
+                    startIcon={<Clock fontSize="small" />}
+                    sx={{ m: 1 }}
+                    variant="contained"
+                    onClick={handleVerify}
+                  >
+                    Verify Timestamp
+                  </Button>
+                )}
+                <Button
+                  color="primary"
+                  startIcon={<DownloadIcon fontSize="small" />}
+                  sx={{ m: 1 }}
+                  variant="contained"
+                  onClick={window.print}
+                >
+                  Export
+                </Button>
               </Box>
             </Grid>
           </Grid>
+          <Box sx={{ mt: 3 }}>
+            <Tabs
+              indicatorColor="primary"
+              onChange={handleTabsChange}
+              scrollButtons="auto"
+              textColor="primary"
+              value={currentTab}
+              variant="scrollable"
+            >
+              {tabs.map((tab) => (
+                <Tab
+                  key={tab.value}
+                  label={tab.label}
+                  value={tab.value}
+                />
+              ))}
+            </Tabs>
+          </Box>
+          <Divider />
+          <Box sx={{ mt: 3 }}>
+            {currentTab === 'cloSurveys' && (
+              <ExcelToTable
+                data={dataCloSurveys}
+                title="CLO Surveys"
+              />
+            )}
+            {currentTab === 'cloWeights' && (
+              <ExcelToTable
+                data={dataCLOWeights}
+                title="CLO Weights"
+              />
+            )}
+            {currentTab === 'discretization' && (
+              <ExcelToTable
+                data={dataDiscretization}
+                title="Discretization"
+              />
+            )}
+            {currentTab === 'pcWeights' && (
+              <ExcelToTable
+                data={dataPCWeights}
+                title="PC Weights"
+              />
+            )}
+            {currentTab === 'grades' && (
+              <ExcelToTable
+                data={dataGrades}
+                title="Grades"
+              />
+            )}
+          </Box>
         </Container>
       </Box>
-      <Dialog
-        fullScreen
-        open={viewPDF}
-      >
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            height: '100%'
-          }}
-        >
-          <Box
-            sx={{
-              backgroundColor: 'background.default',
-              p: 2
-            }}
-          >
-            <Button
-              color="primary"
-              startIcon={<ArrowLeftIcon fontSize="small" />}
-              onClick={(): void => setViewPDF(false)}
-              variant="contained"
-            >
-              Back
-            </Button>
-          </Box>
-          <Box sx={{ flexGrow: 1 }}>
-            <PDFViewer
-              height="100%"
-              style={{ border: 'none' }}
-              width="100%"
-            >
-              <InvoicePDF invoice={invoice} />
-            </PDFViewer>
-          </Box>
-        </Box>
-      </Dialog>
     </>
   );
 };
 
-export default InvoiceDetails;
+export default ReportDetails;
